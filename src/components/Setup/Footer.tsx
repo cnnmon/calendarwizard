@@ -1,7 +1,9 @@
 export default function Footer({
+  nextIsDisabled,
   goToPreviousStep,
   goToNextStep,
 }: {
+  nextIsDisabled?: boolean;
   goToPreviousStep?: () => void;
   goToNextStep?: () => void;
 }) {
@@ -10,7 +12,11 @@ export default function Footer({
       {goToPreviousStep && (
         <button onClick={goToPreviousStep}>{"<"} Back</button>
       )}
-      {goToNextStep && <button onClick={goToNextStep}>Next</button>}
+      {goToNextStep && (
+        <button onClick={goToNextStep} disabled={nextIsDisabled}>
+          Next
+        </button>
+      )}
     </div>
   );
 }

@@ -2,9 +2,9 @@ import Container from "../Container";
 import { useState } from "react";
 import IntroPage from "./IntroPage";
 import CalendarPage from "./CalendarPage";
-import Footer from "./Footer";
+import { Step } from "../constants";
 
-const steps: React.FC[] = [IntroPage, CalendarPage, IntroPage];
+const steps: Step[] = [IntroPage, CalendarPage, IntroPage];
 
 export default function Setup() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -21,8 +21,7 @@ export default function Setup() {
   return (
     <Container name="WizardAssistant Setup">
       <div className="sm:w-[700px]">
-        <Component />
-        <Footer
+        <Component
           goToNextStep={
             currentStep < steps.length - 1 ? goToNextStep : undefined
           }

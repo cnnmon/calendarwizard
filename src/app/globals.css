@@ -24,7 +24,7 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 15px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -58,6 +58,13 @@ button:hover:not(:disabled) {
   color: var(--light);
 }
 
-.draggable {
-  cursor: grab;
+a {
+  cursor: pointer;
+  color: blue;
+  text-decoration: underline;
+}
+
+.no-drag {
+  user-select: none;
+  -webkit-user-drag: none;
 }
