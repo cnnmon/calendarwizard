@@ -38,15 +38,17 @@ export default function Bubble({ message }: { message: Message }) {
 
   return (
     <div className="flex items-start">
-      <div className="mr-2 w-24 mt-[8px]">
-        <Image
-          src="/profile.png"
-          width={100}
-          height={100}
-          alt={sender}
-          className="button no-drag"
-        />
-      </div>
+      {sentBySystem && (
+        <div className="mr-2 w-24 mt-[8px]">
+          <Image
+            src="/profile.png"
+            width={100}
+            height={100}
+            alt={sender}
+            className="button no-drag"
+          />
+        </div>
+      )}
       <div className="w-full">
         <div className="flex justify-between">
           <p>{sender}</p>

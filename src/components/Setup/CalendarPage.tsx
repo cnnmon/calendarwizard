@@ -1,79 +1,84 @@
 import { useEffect, useState } from "react";
-import Box from "./Box";
-import Footer from "./Footer";
 import { useGoogle, fetchCalendars, fetchName } from "./utils";
-import DateSelector from "../Form/DateSelector";
-import { Calendar, StepProps } from "../constants";
+import { StepProps, SetupForm } from "./utils";
+import { Header, Box, DateSelector, Footer } from "../Form";
+import { getAccessToken, getForm, saveAccessToken, saveForm } from "./storage";
 
-type FormState = {
-  accessToken: string;
-  name: string;
-  calendars: Calendar[];
-  selectedCalendars: Calendar[];
-  minDate: Date | null;
-  maxDate: Date | null;
+const initialForm: Omit<SetupForm, "versionId"> = {
+  name: "",
+  calendars: [],
+  selectedCalendars: [],
+  minDate: new Date(
+    new Date().setMonth(new Date().getMonth() - 2)
+  ).toISOString(),
+  maxDate: new Date(
+    new Date().setMonth(new Date().getMonth() + 2)
+  ).toISOString(),
 };
 
 export default function CalendarPage({
   goToNextStep,
   goToPreviousStep,
 }: StepProps) {
-  const [formState, setFormState] = useState<FormState>({
-    accessToken: "",
-    name: "",
-    calendars: [],
-    selectedCalendars: [],
-    minDate: new Date(Date.now() - 366 * 24 * 60 * 60 * 1000),
-    maxDate: new Date(),
+  const [accessToken, setAccessToken] = useState<string>("");
+
+  // form state
+  const [form, setForm] = useState<Omit<SetupForm, "versionId">>(initialForm);
+
+  const login = useGoogle((tokenResponse) => {
+    const accessToken = tokenResponse.access_token;
+    saveAccessToken(accessToken);
+    setAccessToken(accessToken);
+    fetchCalendars(accessToken).then((calendars) => {
+      setForm((prev) => ({
+        ...prev,
+        calendars: calendars.data,
+      }));
+    });
+
+    fetchName(accessToken).then((name) => {
+      if (name.ok) {
+        setForm((prev) => ({
+          ...prev,
+          name: name.data,
+        }));
+      }
+    });
   });
 
   useEffect(() => {
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = getAccessToken();
     if (accessToken) {
-      setFormState((prev) => ({ ...prev, accessToken }));
+      setAccessToken(accessToken);
+      const form = getForm();
+      if (form) {
+        setForm(form);
+      }
     }
   }, []);
 
-  const login = useGoogle((accessToken) => {
-    setFormState((prev) => ({ ...prev, accessToken }));
-  });
-
-  useEffect(() => {
-    if (formState.accessToken) {
-      fetchCalendars(formState.accessToken).then((calendars) => {
-        setFormState((prev) => ({ ...prev, calendars }));
-      });
-      fetchName(formState.accessToken).then((name) => {
-        setFormState((prev) => ({ ...prev, name }));
-      });
-    }
-  }, [formState.accessToken]);
-
-  const handleNext = () => {
-    localStorage.setItem(
-      "selectedCalendars",
-      JSON.stringify(formState.selectedCalendars)
-    );
-    localStorage.setItem("minDate", formState.minDate?.toISOString() || "");
-    localStorage.setItem("maxDate", formState.maxDate?.toISOString() || "");
-    goToNextStep!();
-  };
-
   return (
     <>
-      <div className="bg-white p-4 border-b border-dark-color">
-        <h1 className="text-xl">Google Calendar Integration</h1>
-        <p>
-          Choose the calendar you want to integrate with the Wizard. We
-          won&apos;t store this anywhere.
-        </p>
-      </div>
+      <Header
+        title="Google Calendar Integration"
+        description="Choose the calendar you want to integrate with the Wizard. We
+          don't store your info in any database."
+      />
       <div className="flex flex-col px-4 py-6 gap-6">
         <div>
-          {formState.accessToken ? (
+          {accessToken ? (
             <p>
-              Signed into {formState.name}. Or,{" "}
-              <a onClick={() => login()}>sign into another account</a>.
+              Signed into {form.name}. Or,{" "}
+              <a
+                onClick={() => {
+                  saveAccessToken("");
+                  setAccessToken("");
+                  setForm(initialForm);
+                }}
+              >
+                sign out.
+              </a>
+              .
             </p>
           ) : (
             <p>
@@ -82,18 +87,20 @@ export default function CalendarPage({
           )}
         </div>
         <Box title="Calendars">
-          {formState.calendars.length > 0 ? (
+          {form.calendars.length > 0 ? (
             <div className="overflow-y-auto sm:max-h-[200px]">
-              {formState.calendars.map((calendar) => (
+              {form.calendars.map((calendar) => (
                 <div key={calendar.id} className="flex items-center gap-2 mb-2">
                   <input
                     type="checkbox"
                     id={calendar.id}
                     name={calendar.id}
                     className="h-4 w-4"
-                    checked={formState.selectedCalendars.includes(calendar)}
+                    checked={form.selectedCalendars.some(
+                      (c) => c.id === calendar.id
+                    )}
                     onChange={() =>
-                      setFormState((prev) => ({
+                      setForm((prev) => ({
                         ...prev,
                         selectedCalendars: prev.selectedCalendars.includes(
                           calendar
@@ -119,33 +126,36 @@ export default function CalendarPage({
           <div className="flex flex-col gap-2">
             <DateSelector
               label="Min date to start"
-              value={
-                formState.minDate
-                  ? formState.minDate.toISOString().split("T")[0]
-                  : ""
-              }
+              value={form.minDate}
               onChange={(value) =>
-                setFormState((prev) => ({ ...prev, minDate: new Date(value) }))
+                setForm((prev) => ({
+                  ...prev,
+                  minDate: value,
+                }))
               }
             />
             <DateSelector
               label="Max date to start"
-              value={
-                formState.maxDate
-                  ? formState.maxDate.toISOString().split("T")[0]
-                  : ""
-              }
+              value={form.maxDate}
               onChange={(value) =>
-                setFormState((prev) => ({ ...prev, maxDate: new Date(value) }))
+                setForm((prev) => ({
+                  ...prev,
+                  maxDate: value,
+                }))
               }
             />
           </div>
         </Box>
       </div>
       <Footer
-        goToNextStep={handleNext}
+        goToNextStep={() => {
+          saveForm(form);
+          goToNextStep?.();
+        }}
         goToPreviousStep={goToPreviousStep}
-        nextIsDisabled={formState.selectedCalendars.length === 0}
+        nextIsDisabled={
+          form.selectedCalendars.length === 0 || !form.minDate || !form.maxDate
+        }
       />
     </>
   );

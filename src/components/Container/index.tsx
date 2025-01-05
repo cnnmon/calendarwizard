@@ -1,17 +1,17 @@
 import { ReactNode } from "react";
 import Header from "./Header";
+import Footer from "./Footer";
+import Particles from "./Particles";
 
-export default function Container({
-  children,
-  name,
-}: {
-  children: ReactNode;
-  name: string;
-}) {
+export default function Container({ children }: { children: ReactNode }) {
   return (
-    <div className="bg-gray-100 border-dark-color border-2 w-screen sm:min-w-[300px] sm:w-auto">
-      <Header name={name} />
-      {children}
-    </div>
+    <main className="flex min-h-screen sm:items-center justify-center">
+      <Header />
+      <div className="sm:p-4">
+        <Particles />
+        {children}
+      </div>
+      <Footer />
+    </main>
   );
 }

@@ -1,42 +1,26 @@
-import React from "react";
+"use client";
+import { useState, useEffect } from "react";
 
-function Lines() {
-  return (
-    <div className="w-full mt-1">
-      {[1, 2, 3].map((_, index) => (
-        <div
-          className="h-[7px] border-t-[1.5px] border-dark-color"
-          key={index}
-        />
-      ))}
-    </div>
-  );
+function getNewDate() {
+  const date = new Date();
+  const newDate = new Date(date.setFullYear(date.getFullYear() + 50));
+  return newDate;
 }
 
-export default function Header({
-  name,
-  onExit,
-}: {
-  name: string;
-  onExit?: () => void;
-}) {
+export default function Header() {
+  const [date, setDate] = useState(getNewDate());
+
+  useEffect(() => {
+    setInterval(() => {
+      setDate(getNewDate());
+    }, 1000);
+  }, []);
+
   return (
-    <div className="flex justify-between draggable">
-      <div className="border-b-[1.5px] border-dark-color w-full">
-        <div className="flex mx-2 my-1">
-          <Lines />
-          <p className="px-2 text-center whitespace-nowrap">{name}</p>
-          <Lines />
-        </div>
-      </div>
-      {onExit && (
-        <div
-          className="border-l-[1.5px] border-dark-color border-b-[1.5px] flex justify-center"
-          style={{ width: "50px" }}
-        >
-          <button onClick={onExit}>x</button>
-        </div>
-      )}
+    <div className="absolute top-0 w-full h-8 justify-center bg-light-color border-b-[1.5px] border-dark-color flex items-center z-800">
+      <p suppressHydrationWarning>
+        {date.toDateString()} {date.toLocaleTimeString()}
+      </p>
     </div>
   );
 }

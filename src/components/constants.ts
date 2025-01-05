@@ -4,14 +4,7 @@ export type Message = {
   timestamp: string;
 };
 
-export type Step = React.FC<StepProps>;
-
-export type StepProps = {
-  goToNextStep?: () => void;
-  goToPreviousStep?: () => void;
-};
-
-export interface Calendar {
-  id: string;
-  summary: string;
+export enum Window {
+  Setup = "Setup",
+  Chat = "Chat",
 }

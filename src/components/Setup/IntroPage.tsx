@@ -1,6 +1,6 @@
 import Image from "next/image";
-import Footer from "./Footer";
-import { StepProps } from "../constants";
+import Footer from "../Form/Footer";
+import { StepProps } from "./utils";
 
 export default function IntroPage({ goToNextStep }: StepProps) {
   return (
@@ -8,20 +8,22 @@ export default function IntroPage({ goToNextStep }: StepProps) {
       <div className="flex">
         <div className="w-2/5 relative h-[400px]">
           <Image
-            src="/profile.png"
+            src="/incubation.png"
             alt="profile"
-            fill
-            className="object-cover no-drag"
+            width={1500}
+            height={800}
+            className="object-cover no-drag h-full"
           />
         </div>
 
         <div className="w-3/5 flex flex-col gap-4 p-4">
           <h2 className="text-xl font-medium">
-            Welcome to WizardAssistant Setup
+            Welcome to WizardingAssistant Setup
           </h2>
           <p>
             This wizard will guide you through the installation of
-            WizardAssistant.
+            WizardingAssistant. WizardingAssistant is a tool that helps you
+            manage your life temporally.
           </p>
           <p>Click Next to continue.</p>
         </div>

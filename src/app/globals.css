@@ -9,10 +9,11 @@
 
 :root {
   --dark: #321907;
-  --background: #b3a99d;
+  --background: rgb(199, 191, 210);
   --light: #ffffff;
-  background: var(--background);
   color: var(--dark);
+  background: url('../../public/peanut.png') no-repeat center center fixed;
+  background-size: cover;
 }
 
 body {
@@ -21,6 +22,10 @@ body {
 
 .border {
   border: 1.5px solid var(--dark);
+}
+
+.draggable {
+  cursor: grab;
 }
 
 ::-webkit-scrollbar {
@@ -44,12 +49,11 @@ body {
 
 button:disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 button {
   color: var(--dark);
-  border: 1.5px solid var(--dark);
   padding: 2px 20px;
 }
 
