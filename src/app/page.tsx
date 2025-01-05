@@ -1,6 +1,5 @@
 "use client";
 import Chat from "@/components/Chat";
-import { Message } from "@/components/constants";
 import Container from "@/components/Container";
 import Icon from "@/components/Icon/icon";
 import Setup from "@/components/Setup";

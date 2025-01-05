@@ -22,8 +22,8 @@ export default function IntroPage({ goToNextStep }: StepProps) {
           </h2>
           <p>
             This wizard will guide you through the installation of
-            WizardingAssistant. WizardingAssistant is a tool that helps you
-            manage your life temporally.
+            WizardingAssistant. WizardingAssistant is a wizard of calendars that
+            will help you manage your busy life temporally.
           </p>
           <p>Click Next to continue.</p>
         </div>

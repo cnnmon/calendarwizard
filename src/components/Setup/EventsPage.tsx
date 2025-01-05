@@ -6,15 +6,15 @@ import en from "javascript-time-ago/locale/en";
 import {
   clearEvents,
   getAccessToken,
-  getEvents,
+  getEventsByDate,
+  getEventsVersionId,
   getForm,
-  saveEvents,
 } from "./storage";
 
 TimeAgo.addLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
-function EventLine({ event }: { event: CalendarEvent }) {
+function EventLine({ event, date }: { event: CalendarEvent; date: string }) {
   const dateString = (() => {
     const startDate = new Date(event.start.date ?? event.start.dateTime);
     const endDate = new Date(event.end.date ?? event.end.dateTime);
@@ -25,7 +25,7 @@ function EventLine({ event }: { event: CalendarEvent }) {
     }
 
     // different days
-    return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+    return date;
   })();
 
   return (
@@ -40,7 +40,9 @@ export default function EventsPage({
   goToPreviousStep,
   exitWindow,
 }: StepProps) {
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [eventsByDate, setEventsByDate] = useState<{
+    [key: string]: CalendarEvent[];
+  }>({});
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [currentCalendar, setCurrentCalendar] = useState<Calendar | null>(null);
@@ -57,11 +59,11 @@ export default function EventsPage({
       return;
     }
 
-    const savedEvents = getEvents(savedForm.versionId);
+    const savedEvents = getEventsByDate(savedForm.versionId);
     if (savedEvents) {
-      setEvents(savedEvents.events);
+      setEventsByDate(savedEvents);
       setProgress(100);
-      setLastUpdated(savedEvents.versionId);
+      setLastUpdated(getEventsVersionId());
       // we don't need to re-save events
       return;
     }
@@ -74,11 +76,10 @@ export default function EventsPage({
 
     fetchEvents(accessToken, savedForm, (calendar, progress, events) => {
       setCurrentCalendar(calendar);
-      setEvents(events);
+      setEventsByDate(events);
       setProgress(progress);
     }).then((allEvents) => {
       if (allEvents.ok) {
-        saveEvents(allEvents.data, savedForm.versionId);
         setLastUpdated(savedForm.versionId);
       }
     });
@@ -89,8 +90,8 @@ export default function EventsPage({
       const lastUpdatedDate = new Date(lastUpdated);
       return (
         <p>
-          {events.length} events loaded as of {lastUpdatedDate.toLocaleString()}
-          .{" "}
+          {Object.values(eventsByDate).flat().length} events loaded as of{" "}
+          {lastUpdatedDate.toLocaleString()}.{" "}
           <a
             onClick={() => {
               clearEvents();
@@ -128,11 +129,15 @@ export default function EventsPage({
         </div>
 
         <div className="border bg-white p-4 max-h-[400px] overflow-y-auto">
-          {events
+          {Object.entries(eventsByDate)
             .slice()
-            .reverse()
-            .map((event, index) => (
-              <EventLine key={index.toString()} event={event} />
+            .sort(([dateA], [dateB]) => dateA.localeCompare(dateB))
+            .map(([date, events]) => (
+              <div key={date}>
+                {Array.from(new Set(events)).map((event, index) => (
+                  <EventLine key={index.toString()} event={event} date={date} />
+                ))}
+              </div>
             ))}
         </div>
       </div>

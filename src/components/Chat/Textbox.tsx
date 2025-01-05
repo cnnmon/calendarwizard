@@ -1,48 +1,32 @@
 "use client";
 
-import { Message } from "../constants";
+import { ChangeEvent } from "react";
+import { ChatRequestOptions } from "ai";
 
 export const MAX_CHAT_LENGTH = 250;
 
 export default function Textbox({
-  chatboxText,
-  setChatboxText,
-  chatScrollRef,
-  sendMessage,
+  input,
+  handleInputChange,
+  handleSubmit,
   focusTextbox,
 }: {
-  chatboxText: string;
-  setChatboxText: (text: string) => void;
-  sendMessage: (message: Message) => void;
-  chatScrollRef: React.RefObject<HTMLDivElement>;
+  input: string;
+  handleInputChange: (
+    e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>
+  ) => void;
+  handleSubmit: (
+    event?: { preventDefault?: (() => void) | undefined } | undefined,
+    chatRequestOptions?: ChatRequestOptions | undefined
+  ) => void;
   focusTextbox: () => void;
 }) {
-  const handleSendMessage = () => {
-    const newMessage: Message = {
-      sender: "user",
-      content: chatboxText,
-      timestamp: new Date().toISOString(),
-    };
-
-    sendMessage(newMessage);
-    setChatboxText("");
-
-    /* focus textarea again after sending message */
-    setTimeout(() => {
-      focusTextbox();
-      chatScrollRef.current?.scrollTo({
-        top: chatScrollRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }, 0);
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
 
-      if (chatboxText && chatboxText.length <= MAX_CHAT_LENGTH) {
-        handleSendMessage();
+      if (input && input.length <= MAX_CHAT_LENGTH) {
+        handleSubmit();
       }
 
       setTimeout(() => {
@@ -56,25 +40,25 @@ export default function Textbox({
       <textarea
         className="w-full resize-none p-2 border textbox"
         rows={3}
-        value={chatboxText}
-        onChange={(e) => setChatboxText(e.target.value)}
+        value={input}
+        onChange={(e) => handleInputChange(e)}
         placeholder="Ask me anything..."
         onKeyDown={handleKeyDown}
       />
       <div className="flex justify-between">
         <button
           className="mt-2 border"
-          disabled={!chatboxText || chatboxText.length > MAX_CHAT_LENGTH}
-          onClick={sendMessage}
+          disabled={!input || input.length > MAX_CHAT_LENGTH}
+          onClick={handleSubmit}
         >
           Submit
         </button>
         <p
           className={`mt-1 ${
-            chatboxText.length > MAX_CHAT_LENGTH ? "text-red-500" : ""
+            input.length > MAX_CHAT_LENGTH ? "text-red-500" : ""
           }`}
         >
-          {chatboxText.length}/{MAX_CHAT_LENGTH} characters
+          {input.length}/{MAX_CHAT_LENGTH} characters
         </p>
       </div>
     </div>
