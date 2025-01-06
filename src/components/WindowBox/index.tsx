@@ -12,22 +12,11 @@ export default function WindowBox({
 }) {
   const WindowBoxRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
+    x: 500,
+    y: 200,
   });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    // center the window on initial render
-    if (WindowBoxRef.current) {
-      const rect = WindowBoxRef.current.getBoundingClientRect();
-      setPosition({
-        x: (window.innerWidth - rect.width) / 2,
-        y: (window.innerHeight - rect.height) / 2,
-      });
-    }
-  }, []);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);

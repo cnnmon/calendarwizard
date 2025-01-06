@@ -48,7 +48,6 @@ export default function Events({
                       />
                     </div>{" "}
                   </div>
-                  <p className="text-gray-500">{event.location}</p>
                 </div>
               ))
           )}
