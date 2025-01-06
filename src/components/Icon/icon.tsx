@@ -2,18 +2,30 @@ export default function Icon({
   emoji,
   title,
   onClick,
+  isDisabled,
 }: {
   emoji: string;
   title: string;
   onClick: () => void;
+  isDisabled: boolean;
 }) {
   return (
     <div
-      className="hover:cursor-pointer hover:bg-black p-1 text-center group"
+      className={`p-1 text-center group ${
+        isDisabled
+          ? "opacity-50 cursor-not-allowed"
+          : "hover:cursor-pointer hover:bg-black"
+      }`}
       onClick={onClick}
     >
       <p className="text-4xl">{emoji}</p>
-      <p className="font-bold group-hover:text-white">{title}</p>
+      <p
+        className={`font-bold ${
+          isDisabled ? "text-gray-500" : "group-hover:text-white"
+        }`}
+      >
+        {title}
+      </p>
     </div>
   );
 }

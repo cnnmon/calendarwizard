@@ -9,10 +9,10 @@
 
 :root {
   --dark: #321907;
-  --background: rgb(199, 191, 210);
+  --background: rgb(248, 192, 103);
   --light: #ffffff;
   color: var(--dark);
-  background: url('../../public/peanut.png') no-repeat center center fixed;
+  background: var(--background);
   background-size: cover;
 }
 
@@ -24,9 +24,6 @@ body {
   border: 1.5px solid var(--dark);
 }
 
-.draggable {
-  cursor: grab;
-}
 
 ::-webkit-scrollbar {
   width: 8px;

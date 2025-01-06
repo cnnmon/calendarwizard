@@ -1,46 +1,51 @@
-import Window from "@/components/Window";
-import { useEffect, useState } from "react";
+import WindowBox from "../WindowBox";
+import { Dispatch, useEffect, useState } from "react";
 import IntroPage from "./IntroPage";
-import CalendarPage from "./CalendarPage";
+import CalendarFormPage from "./CalendarFormPage";
 import EventsPage from "./EventsPage";
 import { Step } from "./utils";
-import { saveSetupStep } from "./storage";
-import { getSetupStep } from "./storage";
+import { State } from "../constants";
+import { Action } from "@/app/manager";
 
-const steps: Step[] = [IntroPage, CalendarPage, EventsPage];
+const steps: Step[] = [IntroPage, CalendarFormPage, EventsPage];
 
-export default function Setup({ exitWindow }: { exitWindow: () => void }) {
+export default function Setup({
+  state,
+  dispatch,
+  onExit,
+}: {
+  state: State;
+  dispatch: Dispatch<Action>;
+  onExit: () => void;
+}) {
   const [currentStep, setCurrentStep] = useState(0);
   const Component = steps[currentStep];
 
   useEffect(() => {
-    const step = getSetupStep();
-    if (step) {
-      setCurrentStep(step);
-    }
-  }, []);
+    setCurrentStep(state.setupStep);
+  }, [state.setupStep]);
 
   const goToNextStep = () => {
-    setCurrentStep(currentStep + 1);
-    saveSetupStep(currentStep + 1);
+    dispatch({ type: "setSetupStep", payload: currentStep + 1 });
   };
 
   const goToPreviousStep = () => {
-    setCurrentStep(currentStep - 1);
-    saveSetupStep(currentStep - 1);
+    dispatch({ type: "setSetupStep", payload: currentStep - 1 });
   };
 
   return (
-    <Window name="WizardingAssistant Setup ⚙️">
+    <WindowBox name="WizardingAssistant Setup ⚙️">
       <div className="sm:w-[700px]">
         <Component
+          state={state}
+          dispatch={dispatch}
           goToNextStep={
             currentStep < steps.length - 1 ? goToNextStep : undefined
           }
           goToPreviousStep={currentStep > 0 ? goToPreviousStep : undefined}
-          exitWindow={exitWindow}
+          onExit={onExit}
         />
       </div>
-    </Window>
+    </WindowBox>
   );
 }

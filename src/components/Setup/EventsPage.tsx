@@ -1,101 +1,68 @@
 import { useEffect, useState } from "react";
 import { Header, Footer } from "../Form";
 import { Calendar, CalendarEvent, StepProps, fetchEvents } from "./utils";
-import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en";
-import {
-  clearEvents,
-  getAccessToken,
-  getEventsByDate,
-  getEventsVersionId,
-  getForm,
-} from "./storage";
 
-TimeAgo.addLocale(en);
-const timeAgo = new TimeAgo("en-US");
-
-function EventLine({ event, date }: { event: CalendarEvent; date: string }) {
-  const dateString = (() => {
-    const startDate = new Date(event.start.date ?? event.start.dateTime);
-    const endDate = new Date(event.end.date ?? event.end.dateTime);
-
-    // same date or time
-    if (startDate.toDateString() === endDate.toDateString()) {
-      return timeAgo.format(startDate);
-    }
-
-    // different days
-    return date;
-  })();
-
+function EventLine({ event }: { event: CalendarEvent }) {
   return (
     <div key={event.id} className="flex justify-between">
       <p>{event.summary ?? "(No title)"}</p>
-      <p>{dateString}</p>
+      <p>
+        {new Date(event.start.dateTime || event.start.date).toLocaleString()}
+      </p>
     </div>
   );
 }
 
 export default function EventsPage({
+  state,
+  dispatch,
   goToPreviousStep,
-  exitWindow,
+  onExit,
 }: StepProps) {
+  const [progress, setProgress] = useState(0);
   const [eventsByDate, setEventsByDate] = useState<{
     [key: string]: CalendarEvent[];
   }>({});
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-  const [progress, setProgress] = useState(0);
   const [currentCalendar, setCurrentCalendar] = useState<Calendar | null>(null);
-  const [reloadEvents, setReloadEvents] = useState(false);
-
   const isDone = progress === 100;
 
-  useEffect(() => {
-    setReloadEvents(false);
-
-    const savedForm = getForm();
-    if (!savedForm) {
-      goToPreviousStep?.();
-      return;
-    }
-
-    const savedEvents = getEventsByDate(savedForm.versionId);
-    if (savedEvents) {
-      setEventsByDate(savedEvents);
-      setProgress(100);
-      setLastUpdated(getEventsVersionId());
-      // we don't need to re-save events
-      return;
-    }
-
-    const accessToken = getAccessToken();
-    if (!accessToken) {
-      goToPreviousStep?.();
-      return;
-    }
-
-    fetchEvents(accessToken, savedForm, (calendar, progress, events) => {
-      setCurrentCalendar(calendar);
-      setEventsByDate(events);
-      setProgress(progress);
-    }).then((allEvents) => {
-      if (allEvents.ok) {
-        setLastUpdated(savedForm.versionId);
+  useEffect(
+    () => {
+      if (!state.accessToken || !state.eventsByDate) {
+        goToPreviousStep?.();
+        return;
       }
-    });
-  }, [reloadEvents, goToPreviousStep]);
+
+      if (state.eventsLastUpdated) {
+        setProgress(100);
+        setEventsByDate(state.eventsByDate);
+        return;
+      }
+
+      fetchEvents(state.accessToken, state, (calendar, progress, events) => {
+        setCurrentCalendar(calendar);
+        setProgress(progress);
+        setEventsByDate(events);
+      }).then((allEvents) => {
+        if (allEvents.ok) {
+          dispatch({ type: "setEventsByDate", payload: allEvents.data });
+        }
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   function getProgressText() {
-    if (progress === 100 && lastUpdated) {
-      const lastUpdatedDate = new Date(lastUpdated);
+    if (progress === 100 && state.eventsLastUpdated) {
+      const lastUpdatedDate = new Date(state.eventsLastUpdated);
       return (
         <p>
           {Object.values(eventsByDate).flat().length} events loaded as of{" "}
           {lastUpdatedDate.toLocaleString()}.{" "}
           <a
             onClick={() => {
-              clearEvents();
-              setReloadEvents(true);
+              dispatch({ type: "clearEvents" });
             }}
           >
             Reload events?
@@ -135,7 +102,7 @@ export default function EventsPage({
             .map(([date, events]) => (
               <div key={date}>
                 {Array.from(new Set(events)).map((event, index) => (
-                  <EventLine key={index.toString()} event={event} date={date} />
+                  <EventLine key={index.toString()} event={event} />
                 ))}
               </div>
             ))}
@@ -148,7 +115,7 @@ export default function EventsPage({
             className="border"
             disabled={!isDone}
             onClick={() => {
-              exitWindow?.();
+              onExit?.();
             }}
           >
             {isDone ? "Finish" : "Loading..."}

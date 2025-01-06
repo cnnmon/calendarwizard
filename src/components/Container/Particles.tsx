@@ -11,7 +11,7 @@ interface Particle {
   emoji: string;
 }
 
-const EMOJIS = [".݁", "⋆", "˙", "˖", "⊹", "˚", "⟡"];
+const EMOJIS = ["⋆", "˙", "˖", "⊹", "⟡"];
 
 export default function Particles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -23,7 +23,7 @@ export default function Particles() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // set canvas size to match window size
+    // set canvas size to match WindowBox size
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -36,8 +36,8 @@ export default function Particles() {
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
       size: Math.random() * 10 + 25,
-      speedX: (Math.random() - 0.5) * 0.5,
-      speedY: (Math.random() - 0.5) * 0.5,
+      speedX: (Math.random() - 0.5) * 0.3,
+      speedY: (Math.random() - 0.5) * 0.3,
       opacity: 1,
       emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
     }));

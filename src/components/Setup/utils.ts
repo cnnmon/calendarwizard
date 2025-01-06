@@ -1,21 +1,16 @@
 import { TokenResponse, useGoogleLogin } from "@react-oauth/google";
-import { saveEvents } from "./storage";
+import { Dispatch } from "react";
+import { State } from "../constants";
+import { Action } from "@/app/manager";
 
 export type Step = React.FC<StepProps>;
 
 export type StepProps = {
+  state: State;
+  dispatch: Dispatch<Action>;
   goToNextStep?: () => void;
   goToPreviousStep?: () => void;
-  exitWindow?: () => void;
-};
-
-export type SetupForm = {
-  name: string;
-  calendars: Calendar[];
-  selectedCalendars: Calendar[];
-  minDate: string;
-  maxDate: string;
-  versionId: string;
+  onExit?: () => void;
 };
 
 export type SetupEvents = {
@@ -103,11 +98,11 @@ export async function fetchCalendars(accessToken: string): Promise<GoogleRespons
 
 export async function fetchEvents(
   accessToken: string, 
-  form: SetupForm,
+  state: State,
   setProgress: (calendar: Calendar, progress: number, eventsByDate: {[key: string]: CalendarEvent[]}) => void
-): Promise<GoogleResponse<CalendarEvent[]>> {
+): Promise<GoogleResponse<{[key: string]: CalendarEvent[]}>> {
   const eventsByDate: {[key: string]: CalendarEvent[]} = {};
-  const { selectedCalendars, minDate, maxDate } = form;
+  const { selectedCalendars, minDate, maxDate } = state;
 
   for (let i = 0; i < selectedCalendars.length; i++) {
     const calendar = selectedCalendars[i];
@@ -115,7 +110,7 @@ export async function fetchEvents(
     setProgress(calendar, (i / selectedCalendars.length) * 100, eventsByDate);
 
     const response = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/${calendar.id}/events?timeMin=${minDate}&timeMax=${maxDate}&singleEvents=true&maxResults=2000`,
+      `https://www.googleapis.com/calendar/v3/calendars/${calendar.id}/events?timeMin=${minDate}&timeMax=${maxDate}&singleEvents=true&maxResults=3000`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -127,7 +122,7 @@ export async function fetchEvents(
     if (!response.ok) {
       return {
         ok: false,
-        data: [],
+        data: {},
         error: "Failed to fetch events " + response.statusText,
       };
     }
@@ -156,21 +151,11 @@ export async function fetchEvents(
       });
     });
   }
-
-  // flatten events by date into single sorted array
-  const sortedEvents = Object.keys(eventsByDate)
-    .sort()
-    .flatMap(date => eventsByDate[date]);
-
-  // remove duplicates
-  const uniqueEvents = Array.from(new Set(sortedEvents));
-
   // sets progress to 100% for last calendar
   setProgress(selectedCalendars[selectedCalendars.length - 1], 100, eventsByDate);
-  saveEvents(eventsByDate, form.versionId);
 
   return {
     ok: true,
-    data: uniqueEvents,
+    data: eventsByDate,
   };
 }

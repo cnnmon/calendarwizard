@@ -1,46 +1,56 @@
 "use client";
-import Chat from "@/components/Chat";
 import Container from "@/components/Container";
 import Icon from "@/components/Icon/icon";
-import Setup from "@/components/Setup";
-import { getWindowsOpen, saveWindowsOpen } from "@/components/Setup/storage";
-import { useEffect, useState } from "react";
-import { Window } from "@/components/constants";
+import { useEffect, useReducer } from "react";
+import {
+  Windows,
+  WINDOW_COMPONENTS,
+  WINDOW_ICONS,
+} from "@/components/constants";
+import { initialState, loadState, reducer } from "./manager";
 
 export default function Home() {
-  const [windowsOpen, setWindowsOpen] = useState<Window[]>([]);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    const windowsOpen = getWindowsOpen();
-    setWindowsOpen(windowsOpen);
+    const state = loadState();
+    if (state) {
+      dispatch({ type: "loadState", payload: state });
+    }
   }, []);
 
-  useEffect(() => {
-    saveWindowsOpen(windowsOpen);
-  }, [windowsOpen]);
+  const handleExitWindowBox = (WindowBox: Windows) => {
+    dispatch({ type: "closeWindowBox", payload: WindowBox });
+  };
 
-  const handleExitWindow = (window: Window) => {
-    setWindowsOpen(windowsOpen.filter((w) => w !== window));
+  const handleOpenWindowBox = (WindowBox: Windows) => {
+    dispatch({ type: "openWindowBox", payload: WindowBox });
   };
 
   return (
     <Container>
-      {windowsOpen.includes(Window.Setup) && (
-        <Setup exitWindow={() => handleExitWindow(Window.Setup)} />
-      )}
-      {windowsOpen.includes(Window.Chat) && (
-        <Chat onExit={() => handleExitWindow(Window.Chat)} />
-      )}
-      <Icon
-        emoji="💬"
-        title="Chat"
-        onClick={() => setWindowsOpen([Window.Chat])}
-      />
-      <Icon
-        emoji="⚙️"
-        title="Setup"
-        onClick={() => setWindowsOpen([Window.Setup])}
-      />
+      {state.windowsOpen.map((window) => {
+        const Component = WINDOW_COMPONENTS[window];
+        return (
+          <Component
+            key={`window-${window}`}
+            state={state}
+            dispatch={dispatch}
+            onExit={() => handleExitWindowBox(window)}
+          />
+        );
+      })}
+      <div className="flex gap-4 p-4">
+        {WINDOW_ICONS.map(({ window, emoji, title, isDisabled }) => (
+          <Icon
+            key={`icon-${window}`}
+            emoji={emoji}
+            title={title}
+            onClick={() => handleOpenWindowBox(window)}
+            isDisabled={isDisabled ? isDisabled(state) : false}
+          />
+        ))}
+      </div>
     </Container>
   );
 }

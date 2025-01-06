@@ -1,29 +1,34 @@
 import Bubble from "./Bubble";
 import Textbox from "./Textbox";
-import Window from "@/components/Window";
 import { useChat } from "ai/react";
-import { useRef, useEffect } from "react";
-import {
-  getEventsByDate,
-  saveMessages,
-  getInitialMessages,
-} from "../Setup/storage";
+import { useRef, useEffect, Dispatch } from "react";
+import { State } from "../constants";
+import WindowBox from "../WindowBox";
+import { Action } from "@/app/manager";
 
-export default function Chat({ onExit }: { onExit: () => void }) {
+export default function Chat({
+  state,
+  dispatch,
+  onExit,
+}: {
+  state: State;
+  dispatch: Dispatch<Action>;
+  onExit: () => void;
+}) {
   const chatScrollRef = useRef<HTMLDivElement>(null);
 
   const { messages, input, handleInputChange, handleSubmit } = useChat({
     api: "/api/chat",
     streamProtocol: "text",
-    initialMessages: getInitialMessages(),
+    initialMessages: state.messages,
     body: {
-      eventsByDate: getEventsByDate(),
+      eventsByDate: state.eventsByDate,
     },
     onError: (error) => {
       console.error("Error:", error);
     },
     onFinish: () => {
-      saveMessages(messages);
+      dispatch({ type: "saveMessages", payload: messages });
     },
   });
 
@@ -35,8 +40,8 @@ export default function Chat({ onExit }: { onExit: () => void }) {
   }, [messages]);
 
   return (
-    <Window name="Chat 💬" onExit={onExit}>
-      <div className="sm:w-[550px] sm:h-[600px] sm:max-h-[calc(100vh-100px)] flex flex-col">
+    <WindowBox name="Chat 💬" onExit={onExit}>
+      <div className="sm:w-[550px] h-[600px] sm:max-h-[calc(100vh-100px)] flex flex-col">
         <div
           ref={chatScrollRef}
           className="overflow-y-auto p-4 flex flex-col gap-4 h-full"
@@ -55,6 +60,6 @@ export default function Chat({ onExit }: { onExit: () => void }) {
           }}
         />
       </div>
-    </Window>
+    </WindowBox>
   );
 }

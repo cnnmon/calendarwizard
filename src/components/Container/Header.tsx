@@ -17,7 +17,7 @@ export default function Header() {
   }, []);
 
   return (
-    <div className="absolute top-0 w-full h-8 justify-center bg-light-color border-b-[1.5px] border-dark-color flex items-center z-800">
+    <div className="top-0 w-full h-8 justify-center bg-light-color border-b-[1.5px] border-dark-color flex items-center z-800">
       <p suppressHydrationWarning>
         {date.toDateString()} {date.toLocaleTimeString()}
       </p>
