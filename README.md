@@ -2,10 +2,7 @@ i use my calendar to track every part of my day, so i made a little mini second 
 
 the website is ready-to-go and hosted at https://wizardingassistant.vercel.app/, but unfortunately google cloud api takes a bit to verify the app is trustworthy. currently, this means this only works out of the box with berkeley emails, but feel free to send me your email and i can add it as a test user.
 
-
-
 https://github.com/user-attachments/assets/8973ad4e-4a38-48ec-8a1e-ccce9349d248
-
 
 
 ### built with
@@ -31,3 +28,7 @@ LANGCHAIN_ENDPOINT="https://api.smith.langchain.com"
 LANGCHAIN_API_KEY=
 LANGCHAIN_PROJECT="pr-spotless-creche-43"
 ```
+
+### how it works
+
+![diagram](https://github.com/user-attachments/assets/140e9a4c-727c-4a73-835b-782c207b0d19)
