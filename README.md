@@ -2,7 +2,11 @@ i use my calendar to track every part of my day, so i made a little mini second 
 
 the website is ready-to-go and hosted at https://wizardingassistant.vercel.app/, but unfortunately google cloud api takes a bit to verify the app is trustworthy. currently, this means this only works out of the box with berkeley emails, but feel free to send me your email and i can add it as a test user.
 
-![Screenshot 2025-01-05 at 11 09 06 PM](https://github.com/user-attachments/assets/9861b2de-d058-44cc-9da1-03dd5899f862)
+
+
+https://github.com/user-attachments/assets/8973ad4e-4a38-48ec-8a1e-ccce9349d248
+
+
 
 ### built with
 
