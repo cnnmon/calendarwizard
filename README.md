@@ -10,10 +10,11 @@ https://github.com/user-attachments/assets/8973ad4e-4a38-48ec-8a1e-ccce9349d248
 
 ### built with
 
-next.js, typescript, tailwind
-integrated with google calendar api, langchain, faiss, vercel ai sdk
-used openai gpt-4o-mini and text-embedding-ada-002
-demo'd with my calendar data (incl. summary, start/end datetimes, location, organizer, attendees)
+- next.js, typescript, tailwind
+- integrated with google calendar api, langchain, faiss, vercel ai sdk
+- used openai gpt-4o-mini and text-embedding-ada-002
+- demo'd with my calendar data (incl. summary, start/end datetimes, location, organizer, attendees)
+- drew art & created ui from scratch
 
 ### running it locally
 
