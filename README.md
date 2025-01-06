@@ -1,9 +1,17 @@
-i use my calendar to track every part of my day, so i made a little mini second brain project to store my calendar events & my todo list.
+i use my google calendar to track every part of my day, from to do list items to time blocking to hanging out with friends.
 
-the website is ready-to-go and hosted at https://wizardingassistant.vercel.app/, but unfortunately google cloud api takes a bit to verify the app is trustworthy. currently, this means this only works out of the box with berkeley emails, but feel free to send me your email and i can add it as a test user.
+to take advantage of this really good data, i made a little mini second brain project to store my (or anyone's) calendar events & todo lists, with an assistant ready to help you organize your life. the assistant has semantic & temporal retrieval knowledge of your events.
 
-https://github.com/user-attachments/assets/8973ad4e-4a38-48ec-8a1e-ccce9349d248
+https://github.com/user-attachments/assets/ec53cd51-fa22-40b0-8fea-0a689e4d71c5
 
+fun queries to test the system:
+- "what have i been up to this week?"
+- "for what events have i gone outside?"
+- "what should i put on my todo list?"
+
+### how can i use this?
+
+the website is ready-to-go and hosted at https://wizardingassistant.vercel.app/, but unfortunately google cloud api takes a while to verify an app is trustworthy enough for total public consumption. currently, this means the api only works out of the box with in-org berkeley emails, but feel free to send me your email and i can add you as a test user.
 
 ### built with
 
