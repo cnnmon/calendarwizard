@@ -1,6 +1,7 @@
-import { useGoogle, fetchCalendars, fetchName } from "./utils";
-import { StepProps } from "./utils";
+import { useGoogle, fetchCalendars, fetchName, StepProps } from "./utils";
 import { Header, Box, DateSelector, Footer } from "../Form";
+import { useState, useEffect } from "react";
+import { Calendar } from "../constants";
 
 export default function CalendarFormPage({
   state,
@@ -8,6 +9,17 @@ export default function CalendarFormPage({
   goToNextStep,
   goToPreviousStep,
 }: StepProps) {
+  const [selectedCalendars, setSelectedCalendars] = useState<Calendar[]>([]);
+  const [minDate, setMinDate] = useState<string | null>(null);
+  const [maxDate, setMaxDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedCalendars(state.selectedCalendars);
+    setMinDate(state.minDate);
+    setMaxDate(state.maxDate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const login = useGoogle(async (tokenResponse) => {
     const accessToken = tokenResponse.access_token;
 
@@ -59,17 +71,17 @@ export default function CalendarFormPage({
                     id={calendar.id}
                     name={calendar.id}
                     className="h-4 w-4"
-                    checked={state.selectedCalendars.some(
+                    checked={selectedCalendars.some(
                       (c) => c.id === calendar.id
                     )}
                     onChange={(e) =>
-                      dispatch({
-                        type: "selectCalendar",
-                        payload: {
-                          calendar,
-                          checked: e.target.checked,
-                        },
-                      })
+                      setSelectedCalendars(
+                        e.target.checked
+                          ? [...selectedCalendars, calendar]
+                          : selectedCalendars.filter(
+                              (c) => c.id !== calendar.id
+                            )
+                      )
                     }
                   />
                   <label htmlFor={calendar.id} className="cursor-pointer">
@@ -86,37 +98,33 @@ export default function CalendarFormPage({
           <div className="flex flex-col gap-2">
             <DateSelector
               label="Min date to start"
-              value={state.minDate}
-              onChange={(value) =>
-                dispatch({
-                  type: "setCalendarForm",
-                  payload: { ...state, minDate: value },
-                })
-              }
+              value={minDate || ""}
+              onChange={(value) => setMinDate(value)}
             />
             <DateSelector
               label="Max date to start"
-              value={state.maxDate}
-              onChange={(value) =>
-                dispatch({
-                  type: "setCalendarForm",
-                  payload: { ...state, maxDate: value },
-                })
-              }
+              value={maxDate || ""}
+              onChange={(value) => setMaxDate(value)}
             />
           </div>
         </Box>
       </div>
       <Footer
         goToNextStep={() => {
+          dispatch({
+            type: "setCalendarForm",
+            payload: {
+              ...state,
+              selectedCalendars,
+              minDate: minDate!,
+              maxDate: maxDate!,
+              formVersionId: Date.now().toString(),
+            },
+          });
           goToNextStep?.();
         }}
         goToPreviousStep={goToPreviousStep}
-        nextIsDisabled={
-          state.selectedCalendars.length === 0 ||
-          !state.minDate ||
-          !state.maxDate
-        }
+        nextIsDisabled={selectedCalendars.length === 0 || !minDate || !maxDate}
       />
     </>
   );

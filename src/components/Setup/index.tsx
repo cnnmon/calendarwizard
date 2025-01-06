@@ -1,11 +1,11 @@
 import WindowBox from "../WindowBox";
 import { Dispatch, useEffect, useState } from "react";
 import IntroPage from "./IntroPage";
-import CalendarFormPage from "./CalendarFormPage";
 import EventsPage from "./EventsPage";
 import { Step } from "./utils";
 import { State } from "../constants";
 import { Action } from "@/app/manager";
+import CalendarFormPage from "./CalendarFormPage";
 
 const steps: Step[] = [IntroPage, CalendarFormPage, EventsPage];
 

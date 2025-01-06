@@ -1,10 +1,10 @@
 import Bubble from "./Bubble";
 import Textbox from "./Textbox";
 import { useChat } from "ai/react";
-import { useRef, useEffect, Dispatch } from "react";
+import { useRef, useEffect, Dispatch, useState } from "react";
 import { State } from "../constants";
 import WindowBox from "../WindowBox";
-import { Action } from "@/app/manager";
+import { Action, initialState } from "@/app/manager";
 
 export default function Chat({
   state,
@@ -16,27 +16,30 @@ export default function Chat({
   onExit: () => void;
 }) {
   const chatScrollRef = useRef<HTMLDivElement>(null);
+  const [chatId, setChatId] = useState<number>(1);
 
   const { messages, input, handleInputChange, handleSubmit } = useChat({
+    id: chatId.toString(),
     api: "/api/chat",
     streamProtocol: "text",
-    initialMessages: state.messages,
+    initialMessages: initialState.messages,
     body: {
       eventsByDate: state.eventsByDate,
-    },
-    onError: (error) => {
-      console.error("Error:", error);
-    },
-    onFinish: () => {
-      dispatch({ type: "saveMessages", payload: messages });
+      notepad: state.notepad,
     },
   });
+
+  const clearChat = () => {
+    dispatch({ type: "clearMessages" });
+    setChatId(chatId + 1);
+  };
 
   useEffect(() => {
     chatScrollRef.current?.scrollTo({
       top: chatScrollRef.current.scrollHeight,
-      behavior: "smooth",
     });
+    dispatch({ type: "saveMessages", payload: messages });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
 
   return (
@@ -52,6 +55,7 @@ export default function Chat({
         </div>
         <Textbox
           input={input}
+          clearChat={clearChat}
           handleInputChange={handleInputChange}
           handleSubmit={handleSubmit}
           focusTextbox={() => {

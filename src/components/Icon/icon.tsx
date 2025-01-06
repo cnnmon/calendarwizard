@@ -16,7 +16,7 @@ export default function Icon({
           ? "opacity-50 cursor-not-allowed"
           : "hover:cursor-pointer hover:bg-black"
       }`}
-      onClick={onClick}
+      onClick={isDisabled ? undefined : onClick}
     >
       <p className="text-4xl">{emoji}</p>
       <p

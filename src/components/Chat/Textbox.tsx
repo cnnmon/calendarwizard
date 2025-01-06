@@ -3,13 +3,12 @@
 import { ChangeEvent } from "react";
 import { ChatRequestOptions } from "ai";
 
-export const MAX_CHAT_LENGTH = 250;
-
 export default function Textbox({
   input,
   handleInputChange,
   handleSubmit,
   focusTextbox,
+  clearChat,
 }: {
   input: string;
   handleInputChange: (
@@ -20,12 +19,13 @@ export default function Textbox({
     chatRequestOptions?: ChatRequestOptions | undefined
   ) => void;
   focusTextbox: () => void;
+  clearChat: () => void;
 }) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
 
-      if (input && input.length <= MAX_CHAT_LENGTH) {
+      if (input) {
         handleSubmit();
       }
 
@@ -48,18 +48,14 @@ export default function Textbox({
       <div className="flex justify-between">
         <button
           className="mt-2 border"
-          disabled={!input || input.length > MAX_CHAT_LENGTH}
+          disabled={!input}
           onClick={handleSubmit}
         >
           Submit
         </button>
-        <p
-          className={`mt-1 ${
-            input.length > MAX_CHAT_LENGTH ? "text-red-500" : ""
-          }`}
-        >
-          {input.length}/{MAX_CHAT_LENGTH} characters
-        </p>
+        <a className="mt-1" onClick={() => clearChat()}>
+          Clear chat
+        </a>
       </div>
     </div>
   );

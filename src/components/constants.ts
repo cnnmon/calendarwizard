@@ -2,9 +2,32 @@ import { Dispatch } from "react";
 import Chat from "./Chat";
 import Events from "./Events";
 import Setup from "./Setup";
-import { Calendar, CalendarEvent } from "./Setup/utils";
 import { Action } from "@/app/manager";
 import { Message } from "ai";
+import Notepad from "./Notepad";
+
+export type EventsByDate = { [key: string]: CalendarEvent[] };
+
+export type ChatApiProps = {
+  messages: Message[];
+  eventsByDate: EventsByDate;
+  notepad: string;
+}
+
+export type CalendarEvent = {
+  id: string;
+  summary: string;
+  start: { date: string, dateTime: string, timeZone: string };
+  end: { date: string, dateTime: string, timeZone: string };
+  location: string;
+  organizer: { email: string, displayName: string };
+  attendees: { email: string, responseStatus: string }[];
+};
+
+export interface Calendar {
+  id: string;
+  summary: string;
+}
 
 export type CalendarForm = {
   name: string;
@@ -15,16 +38,18 @@ export type CalendarForm = {
 };
 
 export type SetupForm = CalendarForm & {
-  versionId: string;
+  formVersionId: string;
 };
 
 export type State = {
   setupStep: number;
   accessToken: string;
   windowsOpen: Windows[];
-  eventsByDate: { [key: string]: CalendarEvent[] };
+  eventsByDate: EventsByDate;
+  eventsVersionId: string; // which form version the events were last updated from
   eventsLastUpdated: string | null;
   messages: Message[];
+  notepad: string;
 } & SetupForm;
 
 
@@ -32,6 +57,7 @@ export enum Windows {
   Setup = "Setup",
   Chat = "Chat",
   Events = "Events",
+  Notepad = "Notepad",
 }
 
 export const WINDOW_COMPONENTS: {
@@ -44,9 +70,8 @@ export const WINDOW_COMPONENTS: {
   [Windows.Setup]: Setup,
   [Windows.Chat]: Chat,
   [Windows.Events]: Events,
+  [Windows.Notepad]: Notepad,
 };
-
-export type EventsByDate = { [key: string]: CalendarEvent[] };
 
 export const WINDOW_ICONS: {
   window: Windows;
@@ -67,16 +92,9 @@ export const WINDOW_ICONS: {
     title: "Events",
     isDisabled: (state: State) => !Object.keys(state.eventsByDate).length,
   },
+  {
+    window: Windows.Notepad,
+    emoji: "📝",
+    title: "Notepad",
+  },
 ];
-
-export const initialForm: Omit<SetupForm, "versionId"> = {
-  name: "",
-  calendars: [],
-  selectedCalendars: [],
-  minDate: new Date(
-    new Date().setMonth(new Date().getMonth() - 2)
-  ).toISOString(),
-  maxDate: new Date(
-    new Date().setMonth(new Date().getMonth() + 2)
-  ).toISOString(),
-};

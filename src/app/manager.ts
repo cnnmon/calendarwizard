@@ -1,31 +1,41 @@
-import { initialForm, CalendarForm, State, Windows } from "@/components/constants";
-import { Calendar, CalendarEvent } from "@/components/Setup/utils";
+import { State, Windows, Calendar, SetupForm, CalendarForm, EventsByDate } from "@/components/constants";
 import { Message } from "ai";
 
 const STORAGE_KEY_STATE = "state";
+
+const initialForm: Omit<SetupForm, "formVersionId"> = {
+  name: "",
+  calendars: [],
+  selectedCalendars: [],
+  minDate: new Date(
+    new Date().setMonth(new Date().getMonth() - 2)
+  ).toISOString(),
+  maxDate: new Date(
+    new Date().setMonth(new Date().getMonth() + 2)
+  ).toISOString(),
+};
 
 export const initialState: State = {
   accessToken: "",
   windowsOpen: [],
   eventsLastUpdated: null,
   eventsByDate: {},
+  eventsVersionId: "-1",
   ...initialForm,
   setupStep: 0,
-  versionId: "-1",
-  messages: [
-    {
-      id: "initial-message",
-      role: "assistant",
-      content: "Hello! I'm WizardingAssistant, your home-grown, all-knowing calendar cat wizard. How can I help you today?",
-    },
-  ],
+  formVersionId: "-1",
+  messages: [{
+    id: "1",
+    role: "assistant",
+    content: "Hello! I'm WizardingAssistant, your home-grown, all-knowing calendar cat wizard. How can I help you today?",
+  }],
+  notepad: "",
 };
 
 export type Action =
   | { type: "openWindowBox"; payload: Windows }
   | { type: "closeWindowBox"; payload: Windows }
-  | { type: "setEventsByDate"; payload: { [key: string]: CalendarEvent[] } }
-  | { type: "clearEvents" }
+  | { type: "setEventsByDate"; payload: EventsByDate }
   | { type: "setAccessToken"; payload: string }
   | { type: "selectCalendar"; payload: { calendar: Calendar; checked: boolean } }
   | { type: "reloadEvents" }
@@ -33,8 +43,10 @@ export type Action =
   | { type: "loadState"; payload: State }
   | { type: "saveMessages"; payload: Message[] }
   | { type: "clearAccessToken" }
-  | { type: "setCalendarForm"; payload: CalendarForm }
-  | { type: "loginToGoogleApi", payload: { accessToken: string; calendars: Calendar[]; name: string } };
+  | { type: "setCalendarForm"; payload: SetupForm }
+  | { type: "loginToGoogleApi", payload: { accessToken: string; calendars: Calendar[]; name: string } }
+  | { type: "setNotepad"; payload: string }
+  | { type: "clearMessages" }
 
 function handleAction(state: State, action: Action): State {
   switch (action.type) {
@@ -49,9 +61,13 @@ function handleAction(state: State, action: Action): State {
         windowsOpen: state.windowsOpen.filter((w) => w !== action.payload),
       };
     case "setEventsByDate":
-      return { ...state, eventsByDate: action.payload, eventsLastUpdated: new Date().toISOString() };
-    case "clearEvents":
-      return { ...state, eventsByDate: {}, versionId: "-1", messages: [] };
+      const eventsByDate = action.payload;
+      return {
+        ...state,
+        eventsByDate,
+        eventsLastUpdated: new Date().toISOString(),
+        eventsVersionId: state.formVersionId,
+      };
     case "setSetupStep":
       return { ...state, setupStep: action.payload };
     case "saveMessages":
@@ -61,7 +77,13 @@ function handleAction(state: State, action: Action): State {
     case "setAccessToken":
       return { ...state, accessToken: action.payload };
     case "setCalendarForm":
-      return { ...state, ...action.payload };
+      const newForm: CalendarForm = { ...action.payload };
+      if (JSON.stringify(state.selectedCalendars) === JSON.stringify(newForm.selectedCalendars) &&
+        state.minDate === newForm.minDate &&
+        state.maxDate === newForm.maxDate) {
+        return state;
+      }
+      return { ...state, ...newForm, formVersionId: Date.now().toString() };
     case "loginToGoogleApi":
       return { ...state, ...action.payload };
     case "clearAccessToken":
@@ -79,6 +101,10 @@ function handleAction(state: State, action: Action): State {
         ...state,
         selectedCalendars,
       };
+    case "setNotepad":
+      return { ...state, notepad: action.payload };
+    case "clearMessages":
+      return { ...state, messages: initialState.messages };
     default:
       return state;
   }

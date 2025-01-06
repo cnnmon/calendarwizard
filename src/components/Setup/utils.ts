@@ -1,6 +1,6 @@
 import { TokenResponse, useGoogleLogin } from "@react-oauth/google";
 import { Dispatch } from "react";
-import { State } from "../constants";
+import { Calendar, CalendarEvent, EventsByDate, State } from "../constants";
 import { Action } from "@/app/manager";
 
 export type Step = React.FC<StepProps>;
@@ -12,26 +12,6 @@ export type StepProps = {
   goToPreviousStep?: () => void;
   onExit?: () => void;
 };
-
-export type SetupEvents = {
-  events: CalendarEvent[];
-  versionId: string;
-};
-
-export type CalendarEvent = {
-  id: string;
-  summary: string;
-  start: { date: string, dateTime: string, timeZone: string };
-  end: { date: string, dateTime: string, timeZone: string };
-  location: string;
-  organizer: { email: string, displayName: string };
-  attendees: { email: string, responseStatus: string }[];
-};
-
-export interface Calendar {
-  id: string;
-  summary: string;
-}
 
 type GoogleResponse<T> = {
   ok: boolean;
@@ -99,15 +79,15 @@ export async function fetchCalendars(accessToken: string): Promise<GoogleRespons
 export async function fetchEvents(
   accessToken: string, 
   state: State,
-  setProgress: (calendar: Calendar, progress: number, eventsByDate: {[key: string]: CalendarEvent[]}) => void
-): Promise<GoogleResponse<{[key: string]: CalendarEvent[]}>> {
-  const eventsByDate: {[key: string]: CalendarEvent[]} = {};
+  setProgress: (calendar: Calendar, eventsByDate: EventsByDate) => void
+): Promise<GoogleResponse<EventsByDate>> {
+  const eventsByDate: EventsByDate = {};
   const { selectedCalendars, minDate, maxDate } = state;
 
   for (let i = 0; i < selectedCalendars.length; i++) {
     const calendar = selectedCalendars[i];
     // set progress callback with current calendar and progress percentage
-    setProgress(calendar, (i / selectedCalendars.length) * 100, eventsByDate);
+    setProgress(calendar, eventsByDate);
 
     const response = await fetch(
       `https://www.googleapis.com/calendar/v3/calendars/${calendar.id}/events?timeMin=${minDate}&timeMax=${maxDate}&singleEvents=true&maxResults=3000`,
@@ -151,8 +131,9 @@ export async function fetchEvents(
       });
     });
   }
+
   // sets progress to 100% for last calendar
-  setProgress(selectedCalendars[selectedCalendars.length - 1], 100, eventsByDate);
+  setProgress(selectedCalendars[selectedCalendars.length - 1], eventsByDate);
 
   return {
     ok: true,
