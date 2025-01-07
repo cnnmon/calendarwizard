@@ -1,5 +1,6 @@
 import { State, Windows, Calendar, SetupForm, CalendarForm, EventsByDate } from "@/components/constants";
 import { Message } from "ai";
+import exampleEventsByDate from "../example/eventsByDateExample.json";
 
 const STORAGE_KEY_STATE = "state";
 
@@ -27,9 +28,10 @@ export const initialState: State = {
   messages: [{
     id: "1",
     role: "assistant",
-    content: "Hello! I'm WizardingAssistant, your home-grown, all-knowing calendar cat wizard. How can I help you today?",
+    content: "Hello! I'm WizardingAssistant, your home-grown, all-knowing calendar cat wizard. Ask me anything about your past year(s), specific highlights from your week, or anything else you'd like to know.",
   }],
   notepad: "",
+  isExample: false,
 };
 
 export type Action =
@@ -47,6 +49,7 @@ export type Action =
   | { type: "loginToGoogleApi", payload: { accessToken: string; calendars: Calendar[]; name: string } }
   | { type: "setNotepad"; payload: string }
   | { type: "clearMessages" }
+  | { type: "useExampleCalendar" };
 
 function handleAction(state: State, action: Action): State {
   switch (action.type) {
@@ -67,6 +70,7 @@ function handleAction(state: State, action: Action): State {
         eventsByDate,
         eventsLastUpdated: new Date().toISOString(),
         eventsVersionId: state.formVersionId,
+        messages: initialState.messages,
       };
     case "setSetupStep":
       return { ...state, setupStep: action.payload };
@@ -83,7 +87,7 @@ function handleAction(state: State, action: Action): State {
         state.maxDate === newForm.maxDate) {
         return state;
       }
-      return { ...state, ...newForm, formVersionId: Date.now().toString() };
+      return { ...state, ...newForm, formVersionId: Date.now().toString(), isExample: false };
     case "loginToGoogleApi":
       return { ...state, ...action.payload };
     case "clearAccessToken":
@@ -105,6 +109,13 @@ function handleAction(state: State, action: Action): State {
       return { ...state, notepad: action.payload };
     case "clearMessages":
       return { ...state, messages: initialState.messages };
+    case "useExampleCalendar":
+      return {
+        ...state,
+        isExample: true,
+        eventsByDate: JSON.parse(JSON.stringify(exampleEventsByDate)),
+        messages: initialState.messages,
+      };
     default:
       return state;
   }

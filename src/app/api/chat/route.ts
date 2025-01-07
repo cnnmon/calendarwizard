@@ -2,7 +2,7 @@ import { Message as VercelChatMessage } from 'ai';
 import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { PromptTemplate } from '@langchain/core/prompts';
-import { ChatApiProps } from '@/components/constants';
+import { CalendarEvent, ChatApiProps } from '@/components/constants';
 import { ChatOpenAI } from '@langchain/openai';
 
 export const dynamic = 'force-dynamic';
@@ -27,13 +27,13 @@ Current datetime: {currentDateTime}
 Query: {query}
 Response:`;
 
-const CHAT_TEMPLATE = `You're a helpful calendar wizard cat assistant. Answer concisely (<150 words) unless the user asks for more detail. If info isn't in context, be as helpful as possible but explain that it's your opinion.
+const CHAT_TEMPLATE = `You're a helpful calendar wizard cat assistant. Try to answer concisely (<300 words) unless the user asks for more detail. Cite relevant context as much as possible. Make recommendations if relevant.
 ==============================
 Current datetime: {currentDateTime}
 ==============================
 Notepad: {notepad}
 ==============================
-Relevant context: {context}
+Relevant calendar events: {context}
 ==============================
 History: {chat_history}
 ==============================
@@ -43,7 +43,7 @@ assistant:`;
 
 export async function POST(req: Request) {
   try {
-    const { messages, eventsByDate, notepad }: ChatApiProps = await req.json();
+    const { messages, eventsByDate, notepad, isExample }: ChatApiProps = await req.json();
     const lastMessage = messages[messages.length - 1];
     const previousMessages = messages.slice(-2, -1).map(formatMessage);
 
@@ -75,13 +75,13 @@ export async function POST(req: Request) {
       for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
         const formattedDate = date.toISOString().split('T')[0];
         const events = eventsByDate[formattedDate] || [];
-        relevantContext += `Events on ${formattedDate}: ${events.map(event => event.summary).join(', ')}\n`;
+        relevantContext += `Events on ${formattedDate}: ${events.map((event: CalendarEvent) => event.summary).join(', ')}\n`;
       }
     } 
 
     // also semantic search for context
     const response = await fetch(
-      `${req.url.split('/api/')[0]}/api/vectorstore?query=${encodeURIComponent(lastMessage.content)}`
+      `${req.url.split('/api/')[0]}/api/vectorstore?query=${encodeURIComponent(lastMessage.content)}&isExample=${isExample}`
     );
     const semanticData = await response.json();
 

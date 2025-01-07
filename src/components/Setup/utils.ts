@@ -3,6 +3,11 @@ import { Dispatch } from "react";
 import { Calendar, CalendarEvent, EventsByDate, State } from "../constants";
 import { Action } from "@/app/manager";
 
+export function formExpired(state: State): boolean {
+  return state.formVersionId !== state.eventsVersionId || 
+         parseInt(state.formVersionId) <= Date.now() - 60 * 60 * 1000;
+}
+
 export type Step = React.FC<StepProps>;
 
 export type StepProps = {

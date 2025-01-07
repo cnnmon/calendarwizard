@@ -11,7 +11,7 @@ interface Particle {
   emoji: string;
 }
 
-const EMOJIS = ["⋆", "˙", "˖", "⊹", "⟡"];
+const EMOJIS = ["⋆", "⊹", "+"];
 
 export default function Particles() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -35,7 +35,7 @@ export default function Particles() {
     const particles: Particle[] = Array.from({ length: 20 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      size: Math.random() * 10 + 25,
+      size: Math.random() * 10 + 10,
       speedX: (Math.random() - 0.5) * 0.3,
       speedY: (Math.random() - 0.5) * 0.3,
       opacity: 1,
@@ -61,7 +61,7 @@ export default function Particles() {
         // draw emoji
         ctx.save();
         ctx.globalAlpha = particle.opacity;
-        ctx.fillStyle = "white";
+        ctx.fillStyle = "gray";
         ctx.font = `${particle.size}px Arial`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";

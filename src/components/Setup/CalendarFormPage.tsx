@@ -64,34 +64,49 @@ export default function CalendarFormPage({
         <Box title="Calendars">
           {state.calendars.length > 0 ? (
             <div className="overflow-y-auto sm:max-h-[200px]">
-              {state.calendars.map((calendar) => (
-                <div key={calendar.id} className="flex items-center gap-2 mb-2">
-                  <input
-                    type="checkbox"
-                    id={calendar.id}
-                    name={calendar.id}
-                    className="h-4 w-4"
-                    checked={selectedCalendars.some(
-                      (c) => c.id === calendar.id
-                    )}
-                    onChange={(e) =>
-                      setSelectedCalendars(
-                        e.target.checked
-                          ? [...selectedCalendars, calendar]
-                          : selectedCalendars.filter(
-                              (c) => c.id !== calendar.id
-                            )
-                      )
-                    }
-                  />
-                  <label htmlFor={calendar.id} className="cursor-pointer">
-                    {calendar.summary}
-                  </label>
-                </div>
-              ))}
+              {state.calendars
+                .sort((a, b) => -a.summary.localeCompare(b.summary))
+                .map((calendar) => (
+                  <div
+                    key={calendar.id}
+                    className="flex items-center gap-2 mb-2"
+                  >
+                    <input
+                      type="checkbox"
+                      id={calendar.id}
+                      name={calendar.id}
+                      className="h-4 w-4"
+                      checked={selectedCalendars.some(
+                        (c) => c.id === calendar.id
+                      )}
+                      onChange={(e) =>
+                        setSelectedCalendars(
+                          e.target.checked
+                            ? [...selectedCalendars, calendar]
+                            : selectedCalendars.filter(
+                                (c) => c.id !== calendar.id
+                              )
+                        )
+                      }
+                    />
+                    <label htmlFor={calendar.id} className="cursor-pointer">
+                      {calendar.summary}
+                    </label>
+                  </div>
+                ))}
             </div>
           ) : (
-            <p>No calendars found.</p>
+            <p>
+              No calendars found.{" "}
+              <a
+                onClick={() => {
+                  dispatch({ type: "useExampleCalendar" });
+                  goToNextStep?.();
+                }}
+              >
+                Use an example?
+              </a>
+            </p>
           )}
         </Box>
         <Box title="Time">

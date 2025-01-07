@@ -4,7 +4,7 @@ import { useChat } from "ai/react";
 import { useRef, useEffect, Dispatch, useState } from "react";
 import { State } from "../constants";
 import WindowBox from "../WindowBox";
-import { Action, initialState } from "@/app/manager";
+import { Action } from "@/app/manager";
 
 export default function Chat({
   state,
@@ -22,10 +22,11 @@ export default function Chat({
     id: chatId.toString(),
     api: "/api/chat",
     streamProtocol: "text",
-    initialMessages: initialState.messages,
+    initialMessages: state.messages,
     body: {
       eventsByDate: state.eventsByDate,
       notepad: state.notepad,
+      isExample: state.isExample,
     },
   });
 

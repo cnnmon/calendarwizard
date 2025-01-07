@@ -13,9 +13,9 @@ export default function Home() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    const state = loadState();
-    if (state) {
-      dispatch({ type: "loadState", payload: state });
+    const loadedState = loadState();
+    if (loadedState) {
+      dispatch({ type: "loadState", payload: loadedState });
     }
   }, []);
 

@@ -55,7 +55,7 @@ export default function WindowBox({
 
   return (
     <div
-      className="absolute bg-gray-100 border-dark-color border-2 w-screen sm:min-w-[300px] sm:w-auto"
+      className="absolute z-10 bg-gray-100 no-drag border-dark-color border-2 w-screen sm:min-w-[300px] sm:w-auto"
       ref={WindowBoxRef}
       style={{
         left: `${position.x}px`,

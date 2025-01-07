@@ -12,6 +12,7 @@ export type ChatApiProps = {
   messages: Message[];
   eventsByDate: EventsByDate;
   notepad: string;
+  isExample?: boolean;
 }
 
 export type CalendarEvent = {
@@ -50,6 +51,7 @@ export type State = {
   eventsLastUpdated: string | null;
   messages: Message[];
   notepad: string;
+  isExample: boolean;
 } & SetupForm;
 
 

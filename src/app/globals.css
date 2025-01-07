@@ -12,7 +12,7 @@
   --background: rgb(248, 192, 103);
   --light: #ffffff;
   color: var(--dark);
-  background: var(--background);
+  background: rgb(220, 220, 220);
   background-size: cover;
 }
 

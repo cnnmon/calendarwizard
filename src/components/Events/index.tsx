@@ -12,7 +12,7 @@ export default function Events({
   const eventsByDate = state.eventsByDate;
   const upcomingEvents: CalendarEvent[] = [];
   const today = new Date();
-  const endTime = new Date(today.getTime() + 42 * 60 * 60 * 1000);
+  const endTime = new Date(today.getTime() + 24 * 7 * 60 * 60 * 1000);
   const currentDate = new Date(today);
 
   while (currentDate <= endTime) {
@@ -23,7 +23,7 @@ export default function Events({
 
   return (
     <div className="sm:absolute">
-      <WindowBox name="Events 📅" onExit={onExit}>
+      <WindowBox name="Week Events 📅" onExit={onExit}>
         <div className="flex flex-col p-4 sm:w-[400px] max-h-[500px] overflow-y-auto">
           {upcomingEvents.length === 0 ? (
             <p className="text-gray-500">No upcoming events.</p>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Header, Footer } from "../Form";
 import { CalendarEvent, Calendar, EventsByDate } from "../constants";
-import { StepProps, fetchEvents } from "./utils";
+import { StepProps, fetchEvents, formExpired } from "./utils";
 
 enum ProgressStage {
   PREPARING = "preparing",
@@ -36,12 +36,21 @@ export default function EventsPage({
     stage: ProgressStage.PREPARING,
     eventsByDate: {},
   });
-  const [completedCalendars, setCompletedCalendars] = useState<Calendar[]>([]);
   const [reloadEvents, setReloadEvents] = useState(false);
+  const [currentCalendar, setCurrentCalendar] = useState<Calendar | null>(null);
 
   useEffect(() => {
+    if (state.isExample) {
+      setProgress({
+        current: 100,
+        stage: ProgressStage.DONE,
+        eventsByDate: state.eventsByDate,
+      });
+      return;
+    }
+
     if (!reloadEvents && state.eventsVersionId === state.formVersionId) {
-      if (!state.accessToken || !state.eventsByDate) {
+      if (formExpired(state) || !state.accessToken || !state.eventsByDate) {
         goToPreviousStep?.();
         return;
       }
@@ -57,13 +66,15 @@ export default function EventsPage({
     }
 
     setReloadEvents(false);
+    let completedCalendarCount = 0;
     fetchEvents(state.accessToken, state, (calendar, eventsByDate) => {
-      setCompletedCalendars([...completedCalendars, calendar]);
+      completedCalendarCount++;
       setProgress({
-        current: (completedCalendars.length / state.calendars.length) * 100,
+        current: (completedCalendarCount / state.calendars.length) * 100,
         stage: ProgressStage.LOADING_EVENTS,
         eventsByDate,
       });
+      setCurrentCalendar(calendar);
     }).then((allEvents) => {
       if (allEvents.ok) {
         setProgress({
@@ -89,31 +100,34 @@ export default function EventsPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reloadEvents]);
 
+  console.log(progress.current);
+
   function getProgressText() {
     if (progress.stage === ProgressStage.DONE) {
       const lastUpdatedDate = new Date(state.eventsLastUpdated || "");
       return (
         <p>
-          {Object.values(progress.eventsByDate).flat().length} events loaded as
-          of {lastUpdatedDate.toLocaleString()}.{" "}
-          <a
-            onClick={() => {
-              setReloadEvents(true);
-            }}
-          >
-            Reload events?
-          </a>
+          {Object.values(progress.eventsByDate).flat().length} events{" "}
+          {state.isExample ? (
+            "loaded."
+          ) : (
+            <>
+              loaded as of {lastUpdatedDate.toLocaleString()}.{" "}
+              <a
+                onClick={() => {
+                  setReloadEvents(true);
+                }}
+              >
+                Reload events?
+              </a>
+            </>
+          )}
         </p>
       );
     }
 
     if (progress.stage === ProgressStage.LOADING_EVENTS) {
-      return (
-        <p>
-          Loading events from{" "}
-          {completedCalendars[completedCalendars.length - 1]?.summary}...
-        </p>
-      );
+      return <p>Loading events from {currentCalendar?.summary}...</p>;
     }
 
     if (progress.stage === ProgressStage.LOADING_VECTOR_STORE) {

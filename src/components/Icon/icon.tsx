@@ -11,7 +11,7 @@ export default function Icon({
 }) {
   return (
     <div
-      className={`p-1 text-center group ${
+      className={`p-1 text-center group no-drag ${
         isDisabled
           ? "opacity-50 cursor-not-allowed"
           : "hover:cursor-pointer hover:bg-black"
