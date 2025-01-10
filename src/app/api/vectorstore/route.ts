@@ -56,6 +56,7 @@ export async function GET(req: Request) {
     }
 
     let vectorStore: FaissStore | null = null;
+    console.log("vectorStore", vectorStore);
     if (isExample) {
       // load the vector store from @src/example/vector_store.json
       vectorStore = await FaissStore.load(
@@ -88,6 +89,8 @@ export async function GET(req: Request) {
     const relevantContext = relevantDocs
       .map((doc) => `[${doc.metadata.source}]: ${doc.pageContent}`)
       .join("\n");
+
+    console.log("relevantContext", relevantContext);
 
     return Response.json({ relevantContext });
   } catch (e: unknown) {

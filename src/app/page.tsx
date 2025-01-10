@@ -1,23 +1,16 @@
 "use client";
 import Container from "@/components/Container";
 import Icon from "@/components/Icon/icon";
-import { useEffect, useReducer } from "react";
+import { useReducer } from "react";
 import {
   Windows,
   WINDOW_COMPONENTS,
   WINDOW_ICONS,
 } from "@/components/constants";
-import { initialState, loadState, reducer } from "./manager";
+import { initialState, reducer } from "./manager";
 
 export default function Home() {
   const [state, dispatch] = useReducer(reducer, initialState);
-
-  useEffect(() => {
-    const loadedState = loadState();
-    if (loadedState) {
-      dispatch({ type: "loadState", payload: loadedState });
-    }
-  }, []);
 
   const handleExitWindowBox = (WindowBox: Windows) => {
     dispatch({ type: "closeWindowBox", payload: WindowBox });
