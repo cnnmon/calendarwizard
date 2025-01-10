@@ -2,12 +2,12 @@ import { FaissStore } from "@langchain/community/vectorstores/faiss";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { Document } from "langchain/document";
 import { formatEventsAsString } from "@/app/api/chat/utils";
-import path from "path";
 import { EventsByDate } from "@/components/constants";
+import path from "path";
 
 export const dynamic = "force-dynamic";
-
-const VECTOR_STORE_PATH = "/tmp/vector_store";
+const VECTOR_STORE_PATH = path.join(process.cwd(), "src", "lib", "vector_store");
+const EXAMPLE_VECTOR_STORE_PATH = path.join(process.cwd(), "src", "lib", "example", "vector_store");
 
 export async function POST(req: Request) {
   try {
@@ -58,9 +58,9 @@ export async function GET(req: Request) {
     let vectorStore: FaissStore | null = null;
     console.log("vectorStore", vectorStore);
     if (isExample) {
-      // load the vector store from @src/example/vector_store.json
+      // load the vector store from absolute path to example vector store
       vectorStore = await FaissStore.load(
-        path.join(process.cwd(), "src", "example", "vector_store.json"),
+        EXAMPLE_VECTOR_STORE_PATH,
         new OpenAIEmbeddings({
           modelName: "text-embedding-ada-002",
         })
@@ -85,12 +85,11 @@ export async function GET(req: Request) {
       );
     }
 
-    const relevantDocs = await vectorStore.similaritySearch(query, 150);
+    const relevantDocs = await vectorStore.similaritySearch(query, 50);
     const relevantContext = relevantDocs
       .map((doc) => `[${doc.metadata.source}]: ${doc.pageContent}`)
       .join("\n");
 
-    console.log("relevantContext", relevantContext);
 
     return Response.json({ relevantContext });
   } catch (e: unknown) {

@@ -1,6 +1,6 @@
 import { State, Windows, Calendar, SetupForm, CalendarForm, EventsByDate } from "@/components/constants";
 import { Message } from "ai";
-import exampleEventsByDate from "../example/eventsByDateExample.json";
+import exampleEventsByDate from "../lib/example/eventsByDateExample.json";
 
 const STORAGE_KEY_STATE = "state";
 
